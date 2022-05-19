@@ -2,13 +2,24 @@ using System;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+    /// <summary>
+    /// This class holds settings for the Fog effect with the deferred rendering path.
+    /// </summary>
+    [UnityEngine.Scripting.Preserve]
     [Serializable]
     public sealed class Fog
     {
+        /// <summary>
+        /// If <c>true</c>, enables the internal deferred fog pass. Actual fog settings should be
+        /// set in the Lighting panel.
+        /// </summary>
         [Tooltip("Enables the internal deferred fog pass. Actual fog settings should be set in the Lighting panel.")]
         public bool enabled = true;
 
-        [Tooltip("Should the fog affect the skybox?")]
+        /// <summary>
+        /// Should the fog affect the skybox?
+        /// </summary>
+        [Tooltip("Mark true for the fog to ignore the skybox")]
         public bool excludeSkybox = true;
 
         internal DepthTextureMode GetCameraFlags()
@@ -36,7 +47,7 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetVector(ShaderIDs.FogParams, new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance));
 
             var cmd = context.command;
-            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, excludeSkybox ? 1 : 0);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, excludeSkybox ? 1 : 0, false, null, true);
         }
     }
 }

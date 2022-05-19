@@ -2,12 +2,15 @@ Shader "Hidden/PostProcessing/FinalPass"
 {
     HLSLINCLUDE
 
-        #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
         #pragma multi_compile __ FXAA FXAA_LOW
         #pragma multi_compile __ FXAA_KEEP_ALPHA
-        #include "../StdLib.hlsl"
-        #include "../Colors.hlsl"
-        #include "Dithering.hlsl"
+
+        #pragma vertex VertUVTransform
+        #pragma fragment Frag
+
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Dithering.hlsl"
 
         // PS3 and XBOX360 aren't supported in Unity anymore, only use the PC variant
         #define FXAA_PC 1
@@ -96,9 +99,9 @@ Shader "Hidden/PostProcessing/FinalPass"
         Pass
         {
             HLSLPROGRAM
+                #pragma exclude_renderers gles vulkan switch
 
-                #pragma vertex VertUVTransform
-                #pragma fragment Frag
+                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target 5.0
 
             ENDHLSL
@@ -112,11 +115,41 @@ Shader "Hidden/PostProcessing/FinalPass"
         Pass
         {
             HLSLPROGRAM
+                #pragma exclude_renderers gles vulkan switch
 
-                #pragma vertex VertUVTransform
-                #pragma fragment Frag
+                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target 3.0
 
+            ENDHLSL
+        }
+    }
+
+    SubShader
+    {
+        Cull Off ZWrite Off ZTest Always
+
+        Pass
+        {
+            HLSLPROGRAM
+                #pragma only_renderers gles
+
+                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
+                #pragma target es3.0
+
+            ENDHLSL
+        }
+    }
+
+    SubShader
+    {
+        Cull Off ZWrite Off ZTest Always
+
+        Pass
+        {
+            HLSLPROGRAM
+                #pragma only_renderers gles vulkan switch
+
+                #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET //not supporting STEREO_INSTANCING_ENABLED
             ENDHLSL
         }
     }

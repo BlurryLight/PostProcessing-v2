@@ -4,7 +4,7 @@ using UnityEngine.Rendering.PostProcessing;
 namespace UnityEditor.Rendering.PostProcessing
 {
     [PostProcessEditor(typeof(AmbientOcclusion))]
-    public sealed class AmbientOcclusionEditor : PostProcessEffectEditor<AmbientOcclusion>
+    internal sealed class AmbientOcclusionEditor : PostProcessEffectEditor<AmbientOcclusion>
     {
         SerializedParameterOverride m_Mode;
         SerializedParameterOverride m_Intensity;
@@ -38,14 +38,6 @@ namespace UnityEditor.Rendering.PostProcessing
                 return;
             }
 
-#if !UNITY_2017_1_OR_NEWER
-            if (aoMode == (int)AmbientOcclusionMode.MultiScaleVolumetricObscurance)
-            {
-                EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires Unity 2017.1 or more.", MessageType.Warning);
-                return;
-            }
-#endif
-
             PropertyField(m_Intensity);
 
             if (aoMode == (int)AmbientOcclusionMode.ScalableAmbientObscurance)
@@ -65,9 +57,10 @@ namespace UnityEditor.Rendering.PostProcessing
             }
 
             PropertyField(m_Color);
+            PropertyField(m_AmbientOnly);
 
-            if (Camera.main != null && Camera.main.actualRenderingPath == RenderingPath.DeferredShading && Camera.main.allowHDR)
-                PropertyField(m_AmbientOnly);
+            if (m_AmbientOnly.overrideState.boolValue && m_AmbientOnly.value.boolValue && !RuntimeUtilities.scriptableRenderPipelineActive)
+                EditorGUILayout.HelpBox("Ambient-only only works with cameras rendering in Deferred + HDR", MessageType.Info);
         }
     }
 }
